@@ -96,3 +96,87 @@ export const fetchPasswords = async (
     next(new CustomError("Fetching password failed", HttpStatus.FOUND));
   }
 };
+
+/**
+ ** Method :POST
+ ** Create new password for user
+ */
+
+export const createNewPassword = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ success: false, errors: errors.array() });
+    }
+
+    const { name, password } = req.body;
+
+    const isnameUsed = await Password.findOne({
+      user: req.user,
+      name: new RegExp(`^${name}$`, "i"),
+    });
+    if (isnameUsed)
+      throw new CustomError("Name already in use", HttpStatus.CONFLICT);
+
+    const newPassword = await Password.create({
+      user: req.user,
+      name,
+      password,
+    });
+    res.status(200).json({
+      success: true,
+      newPassword,
+      message: "Password saved successfully",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ ** Method :PUT
+ ** Update created password
+ */
+
+export const updatePassword = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { id } = req.params;
+    await Password.findByIdAndUpdate(id, req.body);
+    res.status(200).json({
+      success: true,
+      message: "Password updated successfully",
+    });
+  } catch (error) {
+    next(new CustomError("Updating password failed", HttpStatus.FOUND));
+  }
+};
+
+/**
+ ** Method :DELETE
+ ** DELETE created password
+ */
+
+export const deletePassword = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { id } = req.params;
+    await Password.findByIdAndDelete(id);
+    res.status(200).json({
+      success: true,
+      message: "Password deleted successfully",
+    });
+  } catch (error) {
+    next(new CustomError("Deleting password failed", HttpStatus.FOUND));
+  }
+};

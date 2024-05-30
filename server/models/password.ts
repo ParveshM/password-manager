@@ -6,7 +6,7 @@ const passwordSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },
-    label: {
+    name: {
       type: String,
       required: true,
     },
@@ -15,7 +15,7 @@ const passwordSchema = new mongoose.Schema(
       required: true,
     },
   },
-  { timestamps: { createdAt: true } }
+  { timestamps: { updatedAt: false } }
 );
 
 export default mongoose.model("Password", passwordSchema);
