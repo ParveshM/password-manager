@@ -18,5 +18,4 @@ const passwordSchema = new mongoose.Schema(
   { timestamps: { createdAt: true } }
 );
 
-//Export the model
-module.exports = mongoose.model("User", passwordSchema);
+export default mongoose.model("User", passwordSchema);

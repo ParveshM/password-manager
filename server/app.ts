@@ -4,6 +4,8 @@ dotenv.config();
 import userRoute from "./routes/userRoute";
 import morgan from "morgan";
 import connectDb from "./config/connection";
+import errorHandlingMidleware from "./middleware/errorHandler.middleware";
+import CustomError from "./utils/customError";
 
 const app: Express = express();
 
@@ -11,6 +13,12 @@ app.use(morgan("dev"));
 app.use(express.json());
 app.use("/api", userRoute);
 
+app.use(errorHandlingMidleware);
+app.all("*", (req, res, next) => {
+  next(new CustomError(`Not found ${req.url}`, 404));
+});
+
+// server
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
   connectDb();
