@@ -6,6 +6,7 @@ import morgan from "morgan";
 import connectDb from "./config/connection";
 import errorHandlingMidleware from "./middleware/errorHandler.middleware";
 import CustomError from "./utils/customError";
+import ENV from "./config/ENV";
 
 const app: Express = express();
 
@@ -19,7 +20,8 @@ app.all("*", (req, res, next) => {
 });
 
 // server
-const port = process.env.PORT || 3000;
+const port = ENV.PORT || 3000;
+
 app.listen(port, () => {
   connectDb();
   console.log(`[server]: Server is running at http://localhost:${port}`);

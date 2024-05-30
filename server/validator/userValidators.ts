@@ -12,3 +12,11 @@ export const userSignupValidator = [
     .withMessage("Password must contain a number.")
     .trim(),
 ];
+
+export const passwordValidator = [
+  body("label").isString(),
+  body("password")
+    .isLength({ min: 1 })
+    .withMessage("Password must be at least 6 characters long.")
+    .trim(),
+];

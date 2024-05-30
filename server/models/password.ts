@@ -18,4 +18,4 @@ const passwordSchema = new mongoose.Schema(
   { timestamps: { createdAt: true } }
 );
 
-export default mongoose.model("User", passwordSchema);
+export default mongoose.model("Password", passwordSchema);
