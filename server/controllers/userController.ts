@@ -62,13 +62,12 @@ export const USER_LOGIN = async (
       name: isEmailExist.name,
       email: isEmailExist.email,
     };
-    const { access_token, refresh_token } = generateTokens(payload);
+    const { access_token } = generateTokens(payload);
 
     return res.status(200).json({
       success: true,
       message: "User LoggedIn successfully",
       access_token,
-      refresh_token,
     });
   } catch (error) {
     next(error);
@@ -86,7 +85,18 @@ export const fetchPasswords = async (
   next: NextFunction
 ) => {
   try {
-    const passwords = await Password.find({ user: req.user });
+    const { page, q } = req.query as { page: string; q: string };
+    const itemsPerPage = 3;
+    const currentPage = parseInt(page, 10) || 1;
+    const skip = (currentPage - 1) * itemsPerPage;
+    let filter: Record<string, any> = {
+      user: req.user,
+    };
+    if (q) filter.name = { $regex: q, $options: "i" };
+
+    const passwords = await Password.find(filter)
+      .skip(skip)
+      .limit(itemsPerPage);
     res.status(200).json({
       success: true,
       passwords,
@@ -149,9 +159,12 @@ export const updatePassword = async (
 ) => {
   try {
     const { id } = req.params;
-    await Password.findByIdAndUpdate(id, req.body);
+    const password = await Password.findByIdAndUpdate(id, req.body, {
+      new: true,
+    });
     res.status(200).json({
       success: true,
+      updatePassword: password,
       message: "Password updated successfully",
     });
   } catch (error) {

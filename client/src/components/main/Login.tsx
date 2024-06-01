@@ -5,7 +5,6 @@ import { useState } from "react";
 import { useFormik } from "formik";
 import showToast from "@/utils/showToast";
 import { SERVER_URL } from "@/constants";
-import { axiosJWT } from "@/utils/axiosJwt";
 import { loginValidation } from "@/utils/validations";
 import {
   Card,
@@ -14,12 +13,21 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Link } from "react-router-dom";
-
-const LoginForm = () => {
+import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
+import { jwtDecode } from "jwt-decode";
+import { useAppDispatch } from "@/redux/store";
+import { setUser } from "@/redux/userSlice";
+type JwtUser = {
+  name: string;
+  id: string;
+  email: string;
+};
+const Login = () => {
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-
+  const navigate = useNavigate();
+  const dispatch = useAppDispatch();
   const formik = useFormik({
     initialValues: {
       email: "",
@@ -28,14 +36,25 @@ const LoginForm = () => {
     validationSchema: loginValidation,
     onSubmit: ({ email, password }) => {
       setIsSubmitting(true);
-      axiosJWT
-        .post(SERVER_URL + "/register", { email, password })
+      axios
+        .post(SERVER_URL + "/login", { email, password })
         .then(({ data }) => {
+          const { access_token } = data;
+          const { id, name } = jwtDecode(access_token) as JwtUser;
+          localStorage.setItem("access_token", access_token);
+          dispatch(
+            setUser({
+              id,
+              name,
+              isAuthenticated: true,
+            })
+          );
           showToast(data.message);
+          navigate("/");
         })
-        .catch(() => {
+        .catch(({ response }) => {
           setIsSubmitting(false);
-          showToast("Opps,something went wrong");
+          showToast(response.data.message, "error");
         });
     },
   });
@@ -48,7 +67,10 @@ const LoginForm = () => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <form className="grid   items-center gap-4">
+          <form
+            className="grid items-center gap-4"
+            onSubmit={formik.handleSubmit}
+          >
             <div className="col-span-3 flex flex-col space-y-1.5">
               <Label htmlFor="email" className="font-oswald">
                 Email
@@ -88,12 +110,14 @@ const LoginForm = () => {
                 </div>
               </div>
             </div>
-          </form>
-          <div className="flex justify-center mt-4">
-            <Button type="submit" className="w-full" disabled={isSubmitting}>
+            <Button
+              type="submit"
+              className="col-span-3"
+              disabled={isSubmitting}
+            >
               Login
             </Button>
-          </div>
+          </form>
         </CardContent>
         <CardFooter className="flex flex-col justify-between">
           <p className="text-nuetralBlue font-sans text-sm">
@@ -109,4 +133,4 @@ const LoginForm = () => {
     </div>
   );
 };
-export default LoginForm;
+export default Login;

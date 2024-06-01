@@ -7,6 +7,8 @@ import { IncludeOptions, OptionsInterface } from "@/types/propsTypes";
 import { Slider } from "@/components/ui/slider";
 import showToast from "@/utils/showToast";
 import SavePasswordDialog from "@/components/Modals/SavePasswordDialog";
+import { useAppSelector } from "@/redux/store";
+import { useNavigate } from "react-router-dom";
 
 export default function Home() {
   const [password, setPassword] = useState<string>("");
@@ -18,9 +20,11 @@ export default function Home() {
     length: 12,
   });
   const [showModal, setShowModal] = useState<boolean>(false);
-
+  const isAuthenticated = useAppSelector((state) => state.isAuthenticated);
+  const navigate = useNavigate();
   useEffect(() => {
-    setPassword(generatePassword(filter));
+    const newPassword = generatePassword(filter);
+    setPassword(newPassword);
   }, [filter]);
 
   const toggleFilter = (key: IncludeOptions) => {
@@ -49,8 +53,9 @@ export default function Home() {
         <form className="mt-6 space-y-4">
           <div className="mt-6 flex text-center gap-1">
             <input
-              className=" border-b-2 border-b-slate-200 font-oswald  text-gray-500 outline-none sm:text-2xl 
-              focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
+              className="border-b-2 border-b-slate-200 font-oswald text-gray-500 outline-none sm:text-2xl
+               focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 
+               dark:border-b-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:focus:ring-primary-500 dark:focus:border-primary-500"
               value={password}
               readOnly
             />
@@ -145,7 +150,9 @@ export default function Home() {
           <Button
             className="w-full "
             type="button"
-            onClick={() => setShowModal(true)}
+            onClick={() => {
+              isAuthenticated ? setShowModal(true) : navigate("/login");
+            }}
           >
             Save
           </Button>
@@ -155,6 +162,7 @@ export default function Home() {
         <SavePasswordDialog
           generatedPassword={password}
           setShow={setShowModal}
+          action="create"
         />
       )}
     </div>

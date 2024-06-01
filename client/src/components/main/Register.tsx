@@ -8,16 +8,18 @@ import {
 } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { SERVER_URL } from "@/constants";
-import { axiosJWT } from "@/utils/axiosJwt";
 import showToast from "@/utils/showToast";
 import { useFormik } from "formik";
 import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { registerValidation } from "@/utils/validations";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
+
 const Register = () => {
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const navigate = useNavigate();
 
   const formik = useFormik({
     initialValues: {
@@ -29,14 +31,15 @@ const Register = () => {
     validationSchema: registerValidation,
     onSubmit: ({ name, email, password }) => {
       setIsSubmitting(true);
-      axiosJWT
-        .post(SERVER_URL + "/register", { name, email, password })
+      axios
+        .post(SERVER_URL + "/signup", { name, email, password })
         .then(({ data }) => {
           showToast(data.message);
+          navigate("/login");
         })
-        .catch(() => {
+        .catch(({ response }) => {
           setIsSubmitting(false);
-          showToast("Opps,something went wrong");
+          showToast(response.data.message, "error");
         });
     },
   });
@@ -49,7 +52,10 @@ const Register = () => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <form className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <form
+            className="grid grid-cols-1 md:grid-cols-2 gap-4"
+            onSubmit={formik.handleSubmit}
+          >
             <div className="flex flex-col space-y-1.5">
               <Label htmlFor="name">Name</Label>
               <input
@@ -116,12 +122,12 @@ const Register = () => {
                   </p>
                 )}
             </div>
+            <div className="flex justify-center mt-4 md:col-span-2">
+              <Button type="submit" className="w-full " disabled={isSubmitting}>
+                Register
+              </Button>
+            </div>
           </form>
-          <div className="flex justify-center mt-4">
-            <Button type="submit" className="w-full">
-              Register
-            </Button>
-          </div>
         </CardContent>
         <CardFooter className="flex flex-col justify-between">
           <p className="text-nuetralBlue font-sans text-sm">

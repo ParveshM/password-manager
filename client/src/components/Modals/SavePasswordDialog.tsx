@@ -13,35 +13,58 @@ import showToast from "@/utils/showToast";
 import { SERVER_URL } from "@/constants";
 import { axiosJWT } from "@/utils/axiosJwt";
 import validationSchema from "@/utils/validations";
+import { PasswordInteface } from "@/pages/SavedPasswords";
 
 interface DialogProps {
-  generatedPassword: string;
+  generatedPassword?: string;
   setShow: (action: boolean) => void;
+  passwordInfo?: {
+    _id: string;
+    name: string;
+    password: string;
+  };
+  action: "create" | "update";
+  updatedPassword?: (data: PasswordInteface) => void;
 }
 const SavePasswordDialog: React.FC<DialogProps> = ({
   generatedPassword,
   setShow,
+  passwordInfo,
+  action,
+  updatedPassword,
 }) => {
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
   const formik = useFormik({
     initialValues: {
-      name: "",
-      password: generatedPassword || "",
+      name: passwordInfo?.name || "",
+      password: generatedPassword || passwordInfo?.password || "",
     },
     validationSchema,
     onSubmit: ({ name, password }) => {
       setIsSubmitting(true);
-      axiosJWT
-        .post(SERVER_URL + "/passwords", { name, password })
+      const url =
+        action === "update"
+          ? `${SERVER_URL}/passwords/${passwordInfo?._id}`
+          : `${SERVER_URL}/passwords`;
+      const method = action === "update" ? "put" : "post";
+
+      axiosJWT({
+        method: method,
+        url: url,
+        data: { name, password },
+      })
         .then(({ data }) => {
+          if (action === "update" && updatedPassword) {
+            updatedPassword(data.updatePassword);
+          }
           showToast(data.message);
           setShow(false);
         })
-        .catch(() => {
+        .catch(({ response }) => {
           setIsSubmitting(false);
-          showToast("Opps,something went wrong");
+          showToast(response.data.message, "error");
         });
     },
   });
@@ -51,7 +74,7 @@ const SavePasswordDialog: React.FC<DialogProps> = ({
       <DialogContent className="sm:max-w-[425px] ">
         <DialogHeader>
           <DialogTitle className="font-oswald text-2xl text-nuetralBlue">
-            Save Password
+            {action === "create" ? "Save" : "Update"} Password
           </DialogTitle>
         </DialogHeader>
         <form className="grid gap-4" onSubmit={formik.handleSubmit}>
