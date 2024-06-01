@@ -5,6 +5,7 @@ import Layout from "@/pages/Layout";
 import { Route, Routes } from "react-router-dom";
 import { ProtectedRoute, PublicRoute } from "./privateRoute";
 import SavedPasswords from "@/pages/SavedPasswords";
+import PageNotFound from "@/pages/PageNotFound";
 
 const MainRouter = () => {
   return (
@@ -19,6 +20,7 @@ const MainRouter = () => {
           <Route path="saved" element={<SavedPasswords />} />
         </Route>
       </Route>
+      <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
 };

@@ -20,7 +20,6 @@ const Register = () => {
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const navigate = useNavigate();
-
   const formik = useFormik({
     initialValues: {
       name: "",

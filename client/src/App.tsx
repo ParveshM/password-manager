@@ -5,19 +5,22 @@ import { Provider } from "react-redux";
 import store, { persistor } from "./redux/store";
 import { PersistGate } from "redux-persist/integration/react";
 import { ThemeProvider } from "./context/ThemeProvider";
+import ErrorBoundary from "./components/Error/ErrorBoundary";
 
 const App = () => {
   return (
-    <BrowserRouter>
-      <Provider store={store}>
-        <PersistGate persistor={persistor}>
-          <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
-            <MainRouter />
-            <Toaster />
-          </ThemeProvider>
-        </PersistGate>
-      </Provider>
-    </BrowserRouter>
+    <ErrorBoundary>
+      <BrowserRouter>
+        <Provider store={store}>
+          <PersistGate persistor={persistor}>
+            <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
+              <MainRouter />
+              <Toaster />
+            </ThemeProvider>
+          </PersistGate>
+        </Provider>
+      </BrowserRouter>
+    </ErrorBoundary>
   );
 };
 
