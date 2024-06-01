@@ -7,11 +7,18 @@ import connectDb from "./config/connection";
 import errorHandlingMidleware from "./middleware/errorHandler.middleware";
 import CustomError from "./utils/customError";
 import ENV from "./config/ENV";
-
+import cors from "cors";
 const app: Express = express();
 
 app.use(morgan("dev"));
 app.use(express.json());
+app.use(
+  cors({
+    origin: true,
+    methods: ["GET", "POST", "PUT", "DELETE"],
+  })
+);
+
 app.use("/api", userRoute);
 
 app.use(errorHandlingMidleware);
